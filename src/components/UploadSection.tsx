@@ -2,122 +2,121 @@ import { useRef, useState } from "react";
 import styled from "styled-components";
 
 export default function UploadSection() {
-  const [bookCount, setBookCount] = useState(1);
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = reader.result as string;
-      const title = `개인 책 ${bookCount}`;
-      const newBook = {
-        id: `personal-${Date.now()}`,
-        title,
-        author: "사용자 업로드",
-        content,
-        coverUrl:
-          "https://images.unsplash.com/photo-1606112219348-204d7d8b94ee?fit=crop&w=300&q=80",
-        isPersonal: true,
-      };
-      const storedBooks = JSON.parse(
-        localStorage.getItem("uploadedBooks") || "[]"
-      );
-      const updated = [newBook, ...storedBooks];
-      localStorage.setItem("uploadedBooks", JSON.stringify(updated));
-      setBookCount(bookCount + 1);
-      window.dispatchEvent(new Event("books-updated"));
-    };
-    reader.readAsText(file);
-  };
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type === "text/plain") {
-      handleFile(file);
+    if (
+      file &&
+      (file.type === "text/plain" || file.type === "application/pdf")
+    ) {
+      console.log("📥 파일 첨부됨:", file.name);
+      // 여기서 파일 처리 로직 실행
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === "text/plain") {
-      handleFile(file);
+    if (
+      file &&
+      (file.type === "text/plain" || file.type === "application/pdf")
+    ) {
+      console.log("✅ 파일 업로드:", file.name);
     }
   };
 
   return (
-    <Container
-      onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={(e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-      }}
-      onDrop={(e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file && file.type === "text/plain") {
-          handleFile(file);
-        }
-      }}
-      $dragging={isDragging}
-    >
-      <h2>📄 txt 파일 업로드</h2>
-      <p>텍스트 파일을 이 영역에 드래그하거나, 파일을 선택하세요.</p>
-      <SelectButton onClick={() => fileInputRef.current?.click()}>
-        파일 선택
-      </SelectButton>
-      <HiddenInput
-        type="file"
-        ref={fileInputRef}
-        accept=".txt"
-        onChange={handleFileUpload}
-      />
-    </Container>
+    <Wrapper>
+      <Title>📤 책 파일 업로드</Title>
+      <DropZone
+        $dragging={isDragging}
+        onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e: React.DragEvent<HTMLDivElement>) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
+        onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+          e.preventDefault();
+          setIsDragging(false);
+          const file = e.dataTransfer.files?.[0];
+          if (
+            file &&
+            (file.type === "text/plain" || file.type === "application/pdf")
+          ) {
+            console.log("📥 파일 첨부됨:", file.name);
+            // 파일 처리 로직 실행
+          }
+        }}
+      >
+        <p>
+          여기에서 <strong>드래그 앤 드롭</strong>으로 파일을 첨부하거나
+        </p>
+        <p>
+          <AttachButton onClick={() => fileInputRef.current?.click()}>
+            첨부하기
+          </AttachButton>{" "}
+          버튼을 눌러 첨부하세요.
+        </p>
+        <SupportText>📎 파일 지원 형식 : PDF, TXT</SupportText>
+        <HiddenInput
+          type="file"
+          ref={fileInputRef}
+          accept=".txt,.pdf"
+          onChange={handleFileUpload}
+        />
+      </DropZone>
+    </Wrapper>
   );
 }
 
-// ================= styled-components =================
-
-const Container = styled.section<{ $dragging: boolean }>`
-  max-width: 1000px;
-  margin: 0rem 1rem 2.5rem 4rem;
-  border: 2px dashed #aaa;
-  padding: 2rem;
-  background-color: ${({ $dragging }) => ($dragging ? "#f5f5f5" : "#fff")};
-  transition: background-color 0.3s;
-  border-radius: 10px;
+const Wrapper = styled.section`
+  width: 100%;
+  margin: 3rem 0 0 2rem;
   text-align: center;
+`;
 
-  h2 {
-    margin-bottom: 1rem;
-    font-size: 1.4rem;
-  }
+const Title = styled.h2`
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  color: #3e2c1c;
+  font-family: "Georgia", serif;
+`;
+
+const DropZone = styled.div<{ $dragging: boolean }>`
+  padding: 10rem;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background-color: ${({ $dragging }) => ($dragging ? "#f5f5f5" : "#fff")};
+  transition: 0.3s ease;
+  line-height: 1.8;
 
   p {
-    margin-bottom: 1rem;
+    margin: 0.5rem 0;
+    font-size: 1rem;
     color: #333;
   }
 `;
 
-const SelectButton = styled.button`
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #d7c4a3;
+const AttachButton = styled.button`
+  background-color: #5f3dc4;
+  color: white;
+  padding: 0.4rem 1rem;
   border: none;
-  border-radius: 4px;
-  color: #3e2c1c;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-weight: 500;
+`;
 
-  &:hover {
-    background-color: #cbb491;
-  }
+const SupportText = styled.p`
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #888;
 `;
 
 const HiddenInput = styled.input`

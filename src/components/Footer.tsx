@@ -10,13 +10,11 @@ export default function Footer() {
   );
 }
 
-// ================= styled-components =================
-
 const FooterContainer = styled.footer`
   width: 100%;
-  background-color: #d7c4a3;
-  border-top: 1px solid #b8a078;
-  padding: 1rem 2rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e1e1e1;
+  padding: 1.5rem 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,7 +24,7 @@ const Inner = styled.div`
   width: 100%;
   max-width: 800px;
   text-align: center;
-  color: #3e2c1c;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  color: #6c757d;
   font-family: "Georgia", serif;
 `;

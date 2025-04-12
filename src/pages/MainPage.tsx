@@ -19,7 +19,10 @@ export default function MainPage() {
 }
 
 const PageLayout = styled.div`
-  width: 800px;
+  max-width: 800px;
+  width: 100%;
+  padding: 0 1rem;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
 `;
