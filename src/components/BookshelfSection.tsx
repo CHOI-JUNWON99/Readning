@@ -1,21 +1,31 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { app } from "../firebase/firebase"; // ⚠️ 너의 firebase 초기화 위치에 맞게 수정해줘
+import { app } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
+
+type Book = {
+  id: string;
+  title: string;
+  author: string;
+  pdfUrl: string;
+  coverUrl: string;
+  isAI: boolean;
+  createdAt?: any;
+};
 
 const db = getFirestore(app);
 
 export default function BookshelfSection() {
-  const [recBooks, setRecBooks] = useState<any[]>([]);
+  const [recBooks, setRecBooks] = useState<Book[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBooks = async () => {
       const querySnapshot = await getDocs(collection(db, "books"));
       const books = querySnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((book) => book.isAI === false); // "리드닝 제공 책" 필터 조건
+        .map((doc) => ({ id: doc.id, ...doc.data() } as Book))
+        .filter((book) => book.isAI === false);
       setRecBooks(books);
     };
     fetchBooks();
@@ -86,7 +96,7 @@ const SliderContainer = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #cdb89e;
+    background-color: #92908e;
     border-radius: 10px;
   }
 `;

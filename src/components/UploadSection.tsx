@@ -5,18 +5,18 @@ export default function UploadSection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (
-      file &&
-      (file.type === "text/plain" || file.type === "application/pdf")
-    ) {
-      console.log("📥 파일 첨부됨:", file.name);
-      // 여기서 파일 처리 로직 실행
-    }
-  };
+  // const handleDrop = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   setIsDragging(false);
+  //   const file = e.dataTransfer.files?.[0];
+  //   if (
+  //     file &&
+  //     (file.type === "text/plain" || file.type === "application/pdf")
+  //   ) {
+  //     console.log("📥 파일 첨부됨:", file.name);
+  //     // 여기서 파일 처리 로직 실행
+  //   }
+  // };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
