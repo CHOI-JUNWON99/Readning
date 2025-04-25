@@ -8,16 +8,24 @@ type Book = {
   id: string;
   title: string;
   author: string;
-  pdfUrl: string;
-  coverUrl: string;
-  isAI: boolean;
+  name?: string;
+  pdfUrl?: string;
+  pdfBlobKey?: string;
+  coverUrl?: string;
+  isAI?: boolean;
   createdAt?: any;
+  chapters?: {
+    page: number;
+    title: string;
+    musicUrl: string;
+  }[];
 };
 
 const db = getFirestore(app);
 
 export default function BookshelfSection() {
   const [recBooks, setRecBooks] = useState<Book[]>([]);
+  const [userBooks, setUserBooks] = useState<Book[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,16 +36,24 @@ export default function BookshelfSection() {
         .filter((book) => book.isAI === false);
       setRecBooks(books);
     };
+
+    const fetchUserBooks = () => {
+      const local = localStorage.getItem("userBooks");
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          setUserBooks(parsed);
+        } catch (e) {
+          console.error("localStorage 파싱 에러:", e);
+        }
+      }
+    };
+
     fetchBooks();
+    fetchUserBooks();
   }, []);
 
-  const myBooks = Array.from({ length: 7 }, (_, i) => ({
-    id: `my-${i}`,
-    title: `개인 책 ${i + 1}`,
-    author: "사용자 업로드",
-  }));
-
-  const handleBookClick = (book: any) => {
+  const handleBookClick = (book: Book) => {
     navigate(`/read/${book.id}`, { state: { book } });
   };
 
@@ -45,9 +61,11 @@ export default function BookshelfSection() {
     <Wrapper>
       <SectionTitle>📁 사용자가 추가한 책 목록</SectionTitle>
       <SliderContainer>
-        {myBooks.map((book) => (
-          <BookCard key={book.id}>
-            <BookCover />
+        {userBooks.map((book) => (
+          <BookCard key={book.id} onClick={() => handleBookClick(book)}>
+            <BookCover
+              style={{ backgroundImage: `url(${book.coverUrl || ""})` }}
+            />
             <BookInfo>
               <strong>{book.title}</strong>
               <small>{book.author}</small>
