@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { BASE_AI_URL } from "../api/axiosInstance";
 
 type Chapter = {
   title: string;
@@ -9,16 +10,34 @@ type Chapter = {
 type Props = {
   txtUrl: string;
   name: string;
+  currentIndex: number;
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  externalAudioRef: React.MutableRefObject<HTMLAudioElement>;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const BASE_AI_URL = "https://ce4f-114-246-199-221.ngrok-free.app";
+// const BASE_AI_URL = "https://5961-114-246-205-231.ngrok-free.app";
 
-export default function TxtViewer({ txtUrl, name }: Props) {
+export default function TxtViewer({
+  txtUrl,
+  name,
+  externalAudioRef,
+  setIsPlaying,
+}: Props) {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loop] = useState(true);
-  const audioRef = useRef(new Audio());
+  //const audioRef = useRef(new Audio());
+  const audioRef = externalAudioRef;
+
+  useEffect(() => {
+    return () => {
+      console.log("📴 TxtViewer 언마운트 - 음악 정지");
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    };
+  }, []);
 
   useEffect(() => {
     const fetchText = async () => {
@@ -42,7 +61,7 @@ export default function TxtViewer({ txtUrl, name }: Props) {
     fetchText();
   }, [txtUrl]);
 
-  // 🎵 음악 로딩 및 반복 설정
+  // 음악 로딩 및 반복 설정
   useEffect(() => {
     if (chapters.length === 0) return;
 
@@ -51,18 +70,21 @@ export default function TxtViewer({ txtUrl, name }: Props) {
 
     console.log("🎵 음악 URL 설정:", musicUrl);
 
-    audio.pause(); // 기존 재생 멈춤
+    audio.pause();
     audio.src = musicUrl;
     audio.loop = loop;
     audio.load();
 
     audio
       .play()
-      .then(() => console.log("자동 재생 시작"))
+      .then(() => {
+        console.log("자동 재생 시작");
+        setIsPlaying(true);
+      })
       .catch((err) => console.warn("자동 재생 실패:", err));
   }, [currentPage, chapters, name, loop]);
 
-  // 🔁 루프 보조: ended 이벤트로 수동 반복 처리
+  // 루프 보조: ended 이벤트로 수동 반복 처리
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -126,23 +148,6 @@ export default function TxtViewer({ txtUrl, name }: Props) {
     }
   };
 
-  // const handlePlay = () => {
-  //   const audio = audioRef.current;
-  //   //const musicUrl = `http://1.236.168.75:8000/gen_musics/${bookId}/ch${currentPage}.wav`;
-  //   const musicUrl = `http://1.236.168.75:8000/gen_musics/Oz_wizard/ch51.wav`;
-  //   if (audio.src !== musicUrl) {
-  //     audio.src = musicUrl;
-  //     audio.load();
-  //   }
-
-  //   console.log("🎧 재생 요청 - URL:", musicUrl);
-
-  //   audio
-  //     .play()
-  //     .then(() => console.log("재생 성공"))
-  //     .catch((err) => console.warn("재생 실패:", err));
-  // };
-
   return (
     <Wrapper>
       {chapters.length > 0 ? (
@@ -157,10 +162,12 @@ export default function TxtViewer({ txtUrl, name }: Props) {
           </TextContainer>
 
           <Controls>
-            {/* <button onClick={handlePlay}>▶ 재생</button> */}
             <button onClick={() => audioRef.current.play()}>▶ 재생</button>
             <button onClick={() => audioRef.current.pause()}>⏸ 멈춤</button>
-            <a href={`${BASE_AI_URL}/${name}/ch${currentPage}.wav`} download>
+            <a
+              href={`${BASE_AI_URL}/gen_musics/${name}/ch${currentPage}.wav`}
+              download
+            >
               ⬇ 다운로드
             </a>
           </Controls>
@@ -196,6 +203,8 @@ const Wrapper = styled.div`
   border-radius: 12px;
   font-family: "Georgia", serif;
   line-height: 1.75;
+  user-select: none;
+  box-sizing: border-box; //레이아웃
 `;
 
 const Title = styled.h2`
@@ -278,6 +287,7 @@ const Controls = styled.div`
     cursor: pointer;
     font-weight: 500;
     transition: background 0.2s;
+    justify-content: center;
 
     &:hover {
       background: #6547c2;

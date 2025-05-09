@@ -1,4 +1,3 @@
-// src/pages/MainPage.tsx
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -25,4 +24,5 @@ const PageLayout = styled.div`
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  user-select: none;
 `;

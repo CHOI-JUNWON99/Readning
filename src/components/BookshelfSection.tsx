@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { app } from "../firebase/firebase";
+import { app } from "@/utils/firebase";
 import { useNavigate } from "react-router-dom";
 
 type Book = {
@@ -37,15 +37,18 @@ export default function BookshelfSection() {
       setRecBooks(books);
     };
 
-    const fetchUserBooks = () => {
-      const local = localStorage.getItem("userBooks");
-      if (local) {
-        try {
-          const parsed = JSON.parse(local);
-          setUserBooks(parsed);
-        } catch (e) {
-          console.error("localStorage 파싱 에러:", e);
-        }
+    const fetchUserBooks = async () => {
+      const uid = localStorage.getItem("user_uid"); // 로그인된 사용자 UID 확인
+      if (!uid) return;
+
+      try {
+        const snapshot = await getDocs(collection(db, "users", uid, "books")); // Firestore에서 해당 유저 경로의 books 컬렉션 불러옴
+        const userUploadedBooks = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Book)
+        );
+        setUserBooks(userUploadedBooks);
+      } catch (e) {
+        console.error("유저 책 불러오기 실패:", e);
       }
     };
 
@@ -72,6 +75,9 @@ export default function BookshelfSection() {
             </BookInfo>
           </BookCard>
         ))}
+        {userBooks.length === 0 && (
+          <p>로그인 후 추가한 책이 여기에 표시됩니다.</p>
+        )}
       </SliderContainer>
 
       <SectionTitle>📘 리드닝이 제공하는 책 목록</SectionTitle>

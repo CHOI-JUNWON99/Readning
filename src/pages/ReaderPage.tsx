@@ -3,10 +3,11 @@ import { useEffect, useState, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import styled from "styled-components";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { app } from "../firebase/firebase";
+import { app } from "@/utils/firebase";
 import TxtViewer from "./TxtViewer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { BASE_AI_URL } from "../api/axiosInstance";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
@@ -25,6 +26,8 @@ type Book = {
 };
 
 export default function ReaderPage() {
+  // const BASE_AI_URL = "https://5961-114-246-205-231.ngrok-free.app";
+
   const { state } = useLocation();
   const book = state?.book as Book;
   const db = getFirestore(app);
@@ -36,7 +39,7 @@ export default function ReaderPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const audioRef = useRef(new Audio());
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(book?.pdfUrl);
-
+  const [txtCurrentChapter, setTxtCurrentChapter] = useState(0);
   const urlToCheck = book?.pdfUrl ?? pdfUrl ?? "";
   const isTxtFile = urlToCheck.includes("books%2Ftxt%2F");
 
@@ -94,15 +97,6 @@ export default function ReaderPage() {
     }
   }, [pageNumber, chapters]);
 
-  const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   const handleDocumentLoad = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
@@ -129,30 +123,60 @@ export default function ReaderPage() {
             </Header>
             <h3>📚 목차</h3>
             <ul>
-              {chapters.map((ch, idx) => (
-                <li key={idx}>
-                  <span onClick={() => setPageNumber(Number(ch.page))}>
-                    {ch.title}
-                  </span>
-                  <div className="chapter-controls">
-                    <button
+              {chapters.map((ch, idx) => {
+                const musicUrl = isTxtFile
+                  ? `${BASE_AI_URL}/gen_musics/${book.name}/ch${idx}.wav`
+                  : ch.musicUrl;
+
+                return (
+                  <li key={idx}>
+                    <span
                       onClick={() => {
-                        audioRef.current.src = ch.musicUrl;
-                        audioRef.current.play();
-                        setIsPlaying(true);
+                        if (isTxtFile) {
+                          setTxtCurrentChapter(idx);
+                        } else {
+                          setPageNumber(Number(ch.page));
+                        }
                       }}
                     >
-                      ▶
-                    </button>
-                    <a href={ch.musicUrl} download>
-                      ⬇
-                    </a>
-                  </div>
-                </li>
-              ))}
+                      {ch.title}
+                    </span>
+                    <div className="chapter-controls">
+                      <button
+                        onClick={() => {
+                          if (!musicUrl) return;
+                          const audio = audioRef.current;
+                          audio.pause(); // 기존 음악 멈춤
+                          audio.src = musicUrl; // 새로운 음악 설정
+                          audio.play();
+                          setIsPlaying(true);
+                        }}
+                      >
+                        {/* 지금 재생 중인 음악이면 ⏸, 아니면 ▶ 표시 */}
+                        {audioRef.current.src === musicUrl && isPlaying
+                          ? "⏸"
+                          : "▶"}
+                      </button>
+                      <a href={musicUrl} download>
+                        ⬇
+                      </a>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             <MusicControls>
-              <button onClick={togglePlay}>
+              <button
+                onClick={() => {
+                  const audio = audioRef.current;
+                  if (isPlaying) {
+                    audio.pause();
+                  } else {
+                    audio.play();
+                  }
+                  setIsPlaying(!isPlaying);
+                }}
+              >
                 {isPlaying ? "⏸️ 멈춤" : "▶️ 재생"}
               </button>
               <a href={audioRef.current.src} download>
@@ -165,7 +189,15 @@ export default function ReaderPage() {
         <Main>
           <PdfContainer>
             {isTxtFile && pdfUrl ? (
-              <TxtViewer txtUrl={pdfUrl} name={book.name} />
+              <TxtViewer
+                key={book.id}
+                txtUrl={pdfUrl}
+                name={book.name}
+                currentIndex={txtCurrentChapter}
+                setCurrentIndex={setTxtCurrentChapter}
+                externalAudioRef={audioRef}
+                setIsPlaying={setIsPlaying}
+              />
             ) : pdfUrl?.includes(".pdf") ? (
               <Document file={pdfUrl} onLoadSuccess={handleDocumentLoad}>
                 <Page
@@ -206,6 +238,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   max-width: 960px;
+  user-select: none;
 `;
 
 const Layout = styled.div`
