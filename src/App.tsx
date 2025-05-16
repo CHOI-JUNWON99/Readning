@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import ReaderPage from "./pages/ReaderPage";
 import styled from "styled-components";
+import TestMusicAPI from "./pages/TestMusicAPI";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/read/:bookId" element={<ReaderPage />} />
+          <Route path="/test-music" element={<TestMusicAPI />} />
         </Routes>
       </BrowserRouter>
     </AppWrapper>
