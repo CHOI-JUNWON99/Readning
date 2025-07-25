@@ -5,9 +5,12 @@ import styled from "styled-components";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { app } from "@/utils/firebase";
 import TxtViewer from "./TxtViewer";
+import EpubViewer from "../components/EpubViewer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { BASE_AI_URL } from "../api/axiosInstance";
+import { saveReadingProgress, getReadingProgress, updateReadingTime } from "@/utils/readingProgress";
+import { getUserMusicPreferences } from "@/utils/musicPreferences";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
@@ -41,10 +44,15 @@ export default function ReaderPage() {
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(book?.pdfUrl);
   const [txtCurrentChapter, setTxtCurrentChapter] = useState(0);
   const urlToCheck = book?.pdfUrl ?? pdfUrl ?? "";
-  const isTxtFile = urlToCheck.includes("books%2Ftxt%2F");
+  const isTxtFile = urlToCheck.includes("books%2Ftxt%2F") || urlToCheck.includes(".txt");
+  const isEpubFile = urlToCheck.includes(".epub");
+  const isPdfFile = urlToCheck.includes(".pdf");
+  const startTimeRef = useRef<Date>(new Date());
+  const [isGeneratingMusic, setIsGeneratingMusic] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<string[]>([]);
 
   useEffect(() => {
-    if (book?.pdfUrl || isTxtFile) return;
+    if (book?.pdfUrl || isTxtFile || isEpubFile) return;
     const loadFromIndexedDB = async () => {
       const dbReq = window.indexedDB.open("MyBookStorage");
       dbReq.onsuccess = () => {
@@ -62,7 +70,101 @@ export default function ReaderPage() {
       };
     };
     loadFromIndexedDB();
-  }, [book?.id, book?.pdfUrl, isTxtFile]);
+  }, [book?.id, book?.pdfUrl, isTxtFile, isEpubFile]);
+
+  // 마지막 읽은 위치 복원
+  useEffect(() => {
+    const restoreReadingPosition = async () => {
+      if (!book?.id) return;
+      
+      const progress = await getReadingProgress(book.id);
+      if (progress) {
+        if (progress.currentPage && isPdfFile) {
+          setPageNumber(progress.currentPage);
+        } else if (progress.currentChapter !== undefined && (isTxtFile || isEpubFile)) {
+          setTxtCurrentChapter(progress.currentChapter);
+        }
+      }
+    };
+    
+    restoreReadingPosition();
+  }, [book?.id, isTxtFile, isEpubFile, isPdfFile]);
+
+  // 읽기 시간 추적
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (book?.id) {
+        const now = new Date();
+        const diffInMinutes = Math.floor((now.getTime() - startTimeRef.current.getTime()) / (1000 * 60));
+        if (diffInMinutes > 0) {
+          updateReadingTime(book.id, diffInMinutes);
+          startTimeRef.current = now;
+        }
+      }
+    }, 60000); // 1분마다 체크
+
+    return () => clearInterval(interval);
+  }, [book?.id]);
+
+  // 페이지/챕터 변경 시 진행률 저장
+  useEffect(() => {
+    if (book?.id) {
+      if (isTxtFile || isEpubFile) {
+        saveReadingProgress(book.id, undefined, undefined, txtCurrentChapter, chapters.length);
+      } else if (isPdfFile && numPages) {
+        saveReadingProgress(book.id, pageNumber, numPages);
+      }
+    }
+  }, [book?.id, pageNumber, numPages, txtCurrentChapter, chapters.length, isTxtFile, isEpubFile, isPdfFile]);
+
+  // 사용자 음악 취향 로드
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      const preferences = await getUserMusicPreferences();
+      setUserPreferences(preferences);
+    };
+    loadUserPreferences();
+  }, []);
+
+  // 개인화된 음악 생성 함수
+  const generatePersonalizedMusic = async (chapterIndex: number, chapterTitle: string) => {
+    if (!book?.id || isGeneratingMusic) return null;
+
+    setIsGeneratingMusic(true);
+    try {
+      const formData = new FormData();
+      
+      // PDF/TXT 파일 추가 (필요한 경우)
+      if (pdfUrl) {
+        const response = await fetch(pdfUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `${book.name || book.id}.pdf`, { type: blob.type });
+        formData.append("file", file);
+      }
+      
+      formData.append("book_id", book.id);
+      formData.append("page", String(chapterIndex + 1));
+      formData.append("chapter_title", chapterTitle);
+      formData.append("preference", JSON.stringify(userPreferences));
+
+      const response = await fetch(`${BASE_AI_URL}/generate/music-v3`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI 서버 응답 오류: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return `${BASE_AI_URL}/gen_musics/${book.id}/ch${chapterIndex}.wav`;
+    } catch (error) {
+      console.error("개인화된 음악 생성 실패:", error);
+      return null;
+    } finally {
+      setIsGeneratingMusic(false);
+    }
+  };
 
   useEffect(() => {
     const fetchChapters = async () => {
@@ -76,26 +178,53 @@ export default function ReaderPage() {
             page: Number(ch.page),
           }));
           setChapters(converted);
-          if (converted[0]?.musicUrl) {
+          
+          // 첫 번째 챕터의 개인화된 음악 생성 및 재생
+          if (converted[0] && userPreferences.length > 0) {
+            generatePersonalizedMusic(0, converted[0].title).then((musicUrl) => {
+              if (musicUrl) {
+                audioRef.current.src = musicUrl;
+                audioRef.current.play();
+              }
+            });
+          } else if (converted[0]?.musicUrl) {
+            // 기존 음악이 있는 경우 기본값으로 사용
             audioRef.current.src = converted[0].musicUrl;
             audioRef.current.play();
           }
         }
       }
     };
-    fetchChapters();
-  }, [book?.id]);
+    
+    // 사용자 취향이 로드된 후에 챕터 로드
+    if (userPreferences.length >= 0) {
+      fetchChapters();
+    }
+  }, [book?.id, userPreferences]);
 
   useEffect(() => {
     const matched = chapters
       .slice()
       .reverse()
       .find((ch) => ch.page <= pageNumber);
-    if (matched && matched.musicUrl !== audioRef.current.src) {
-      audioRef.current.src = matched.musicUrl;
-      if (isPlaying) audioRef.current.play();
+    
+    if (matched) {
+      const chapterIndex = chapters.findIndex(ch => ch === matched);
+      
+      // 사용자 취향이 있으면 개인화된 음악 생성, 없으면 기본 음악 사용
+      if (userPreferences.length > 0) {
+        generatePersonalizedMusic(chapterIndex, matched.title).then((musicUrl) => {
+          if (musicUrl && musicUrl !== audioRef.current.src) {
+            audioRef.current.src = musicUrl;
+            if (isPlaying) audioRef.current.play();
+          }
+        });
+      } else if (matched.musicUrl !== audioRef.current.src) {
+        audioRef.current.src = matched.musicUrl;
+        if (isPlaying) audioRef.current.play();
+      }
     }
-  }, [pageNumber, chapters]);
+  }, [pageNumber, chapters, userPreferences]);
 
   const handleDocumentLoad = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -124,7 +253,7 @@ export default function ReaderPage() {
             <h3>📚 목차</h3>
             <ul>
               {chapters.map((ch, idx) => {
-                const musicUrl = isTxtFile
+                const defaultMusicUrl = (isTxtFile || isEpubFile)
                   ? `${BASE_AI_URL}/gen_musics/${book.name}/ch${idx}.wav`
                   : ch.musicUrl;
 
@@ -132,7 +261,7 @@ export default function ReaderPage() {
                   <li key={idx}>
                     <span
                       onClick={() => {
-                        if (isTxtFile) {
+                        if (isTxtFile || isEpubFile) {
                           setTxtCurrentChapter(idx);
                         } else {
                           setPageNumber(Number(ch.page));
@@ -143,21 +272,38 @@ export default function ReaderPage() {
                     </span>
                     <div className="chapter-controls">
                       <button
-                        onClick={() => {
-                          if (!musicUrl) return;
+                        onClick={async () => {
                           const audio = audioRef.current;
-                          audio.pause(); // 기존 음악 멈춤
-                          audio.src = musicUrl; // 새로운 음악 설정
-                          audio.play();
-                          setIsPlaying(true);
+                          audio.pause();
+                          
+                          // 사용자 취향이 있으면 개인화된 음악 생성
+                          if (userPreferences.length > 0) {
+                            const personalizedUrl = await generatePersonalizedMusic(idx, ch.title);
+                            if (personalizedUrl) {
+                              audio.src = personalizedUrl;
+                              audio.play();
+                              setIsPlaying(true);
+                            }
+                          } else if (defaultMusicUrl) {
+                            audio.src = defaultMusicUrl;
+                            audio.play();
+                            setIsPlaying(true);
+                          }
                         }}
+                        disabled={isGeneratingMusic}
                       >
-                        {/* 지금 재생 중인 음악이면 ⏸, 아니면 ▶ 표시 */}
-                        {audioRef.current.src === musicUrl && isPlaying
-                          ? "⏸"
-                          : "▶"}
+                        {isGeneratingMusic 
+                          ? "🎵" 
+                          : (audioRef.current.src.includes(`ch${idx}`) && isPlaying ? "⏸" : "▶")
+                        }
                       </button>
-                      <a href={musicUrl} download>
+                      <a 
+                        href={userPreferences.length > 0 
+                          ? `${BASE_AI_URL}/gen_musics/${book.id}/ch${idx}.wav` 
+                          : defaultMusicUrl
+                        } 
+                        download
+                      >
                         ⬇
                       </a>
                     </div>
@@ -198,7 +344,17 @@ export default function ReaderPage() {
                 externalAudioRef={audioRef}
                 setIsPlaying={setIsPlaying}
               />
-            ) : pdfUrl?.includes(".pdf") ? (
+            ) : isEpubFile && pdfUrl ? (
+              <EpubViewer
+                key={book.id}
+                epubUrl={pdfUrl}
+                name={book.name}
+                currentIndex={txtCurrentChapter}
+                setCurrentIndex={setTxtCurrentChapter}
+                externalAudioRef={audioRef}
+                setIsPlaying={setIsPlaying}
+              />
+            ) : isPdfFile && pdfUrl ? (
               <Document file={pdfUrl} onLoadSuccess={handleDocumentLoad}>
                 <Page
                   key={pageNumber}
@@ -212,7 +368,7 @@ export default function ReaderPage() {
             )}
           </PdfContainer>
 
-          {!isTxtFile && (
+          {isPdfFile && (
             <NavButtons>
               <button onClick={prevPage} disabled={pageNumber === 1}>
                 ← 이전

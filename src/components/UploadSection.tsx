@@ -110,9 +110,23 @@ export default function UploadSection() {
         onDrop={(e: React.DragEvent<HTMLDivElement>) => {
           e.preventDefault();
           const dropped = e.dataTransfer.files[0];
-          if (dropped && dropped.type === "application/pdf") {
-            setFile(dropped);
-            setShowModal(true);
+          if (dropped) {
+            const validTypes = [
+              "application/pdf",
+              "text/plain", 
+              "application/epub+zip"
+            ];
+            const ext = dropped.name.slice(dropped.name.lastIndexOf(".")).toLowerCase();
+            const validExtensions = [".pdf", ".txt", ".epub"];
+            
+            const isValid = validTypes.includes(dropped.type) || validExtensions.includes(ext);
+            
+            if (isValid) {
+              setFile(dropped);
+              setShowModal(true);
+            } else {
+              alert("PDF, TXT 또는 EPUB 파일만 업로드할 수 있습니다.");
+            }
           }
         }}
       >
@@ -128,7 +142,7 @@ export default function UploadSection() {
         <HiddenInput
           type="file"
           ref={fileInputRef}
-          accept=".pdf"
+          accept=".pdf,.txt,.epub"
           onChange={handleFileUpload}
         />
       </DropZone>
