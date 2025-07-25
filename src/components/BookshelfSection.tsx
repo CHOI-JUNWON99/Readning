@@ -182,17 +182,23 @@ const SectionTitle = styled.h3`
 `;
 
 const MusicButton = styled.button`
-  background: #5f3dc4;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 
   &:hover {
-    background: #4c2db3;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
   }
 `;
 
@@ -215,16 +221,19 @@ const SliderContainer = styled.div`
 
 const BookCard = styled.div`
   min-width: 130px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
   text-align: center;
-  padding: 0.6rem;
+  padding: 1rem;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
   }
 `;
 
@@ -295,9 +304,13 @@ const BookInfo = styled.div`
 
 const ProgressInfo = styled.div`
   font-size: 0.75rem;
-  color: #5f3dc4;
+  color: #667eea;
   font-weight: bold;
   margin-top: 0.2rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  display: inline-block;
 `;
 
 const GridContainer = styled.div`

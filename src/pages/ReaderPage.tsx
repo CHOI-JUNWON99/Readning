@@ -244,13 +244,14 @@ export default function ReaderPage() {
 
         {sidebarOpen && (
           <Sidebar>
-            <Header>
-              <div>
-                <h2>{book.title}</h2>
-                <p>{book.author}</p>
-              </div>
-            </Header>
-            <h3>📚 목차</h3>
+            <SidebarHeader>
+              <BookInfo>
+                <BookTitle>{book.title}</BookTitle>
+                <BookAuthor>{book.author}</BookAuthor>
+              </BookInfo>
+              <CloseButton onClick={() => setSidebarOpen(false)}>×</CloseButton>
+            </SidebarHeader>
+            <ChapterTitle>📚 목차</ChapterTitle>
             <ul>
               {chapters.map((ch, idx) => {
                 const defaultMusicUrl = (isTxtFile || isEpubFile)
@@ -393,37 +394,60 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 960px;
+  max-width: 1400px;
   user-select: none;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 `;
 
 const Layout = styled.div`
   display: flex;
   position: relative;
+  width: 100%;
+  flex: 1;
 `;
 
 const Hamburger = styled.button`
-  position: absolute;
-  top: 5.3rem;
-  left: 3rem;
-  z-index: 1000;
-  font-size: 1.5rem;
-  background: none;
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 1001;
+  width: 50px;
+  height: 50px;
+  background: white;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.05);
+  }
 `;
 
 const Sidebar = styled.aside`
-  position: absolute;
-  top: 4rem;
-  left: 2rem;
-  width: 280px;
-  height: 82%;
-  background: #f5f5f5;
-  border-right: 1px solid #ccc;
-  padding: 1rem;
-  z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 350px;
+  height: 100vh;
+  background: white;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(102, 126, 234, 0.1);
+  padding: 2rem;
+  z-index: 1000;
   overflow-y: auto;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+  transform: translateX(0);
+  transition: transform 0.3s ease;
 
   ul {
     list-style: none;
@@ -431,29 +455,59 @@ const Sidebar = styled.aside`
     margin-top: 2rem;
 
     li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+      }
 
       span {
         cursor: pointer;
-        color: #5f3dc4;
-        font-weight: 500;
+        color: #333;
+        font-weight: 600;
+        font-size: 1rem;
+        display: block;
+        margin-bottom: 0.5rem;
+        
+        &:hover {
+          color: #667eea;
+        }
       }
 
       .chapter-controls {
         display: flex;
-        gap: 0.4rem;
+        gap: 0.5rem;
 
         button,
         a {
-          background: #ddd;
+          background: #667eea;
+          color: white;
           border: none;
-          padding: 0.3rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.8rem;
+          padding: 0.5rem 0.8rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
           cursor: pointer;
+          transition: all 0.2s ease;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+          }
+
+          &:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+          }
         }
       }
     }
@@ -462,48 +516,172 @@ const Sidebar = styled.aside`
 
 const MusicControls = styled.div`
   margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 
   button {
-    background: #5f3dc4;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 0.4rem 1rem;
-    border-radius: 6px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
   }
 
   a {
     text-decoration: none;
-    color: #5f3dc4;
-    font-weight: bold;
+    color: #667eea;
+    font-weight: 600;
     text-align: center;
+    padding: 0.5rem;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #764ba2;
+    }
   }
 `;
 
 const Main = styled.main`
   width: 100%;
-  max-width: 960px;
-  padding: 1.5rem 1.5rem 2rem; // 상하 여백 조절
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
   box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const SidebarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+`;
+
+const BookInfo = styled.div`
+  flex: 1;
+`;
+
+const BookTitle = styled.h2`
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+`;
+
+const BookAuthor = styled.p`
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+`;
+
+const ChapterTitle = styled.h3`
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
 `;
 
 const Header = styled.div`
-  margin-top: 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+  }
 `;
 
 const PdfContainer = styled.div`
-  margin-top: 2rem;
-  border: 1px solid #ccc;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  overflow: hidden;
 `;
 
 const NavButtons = styled.div`
   display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  span {
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
 `;

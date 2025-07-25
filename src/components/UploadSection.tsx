@@ -102,7 +102,8 @@ export default function UploadSection() {
 
   return (
     <Wrapper>
-      <Title>📤 책 파일 업로드</Title>
+      <Title>📚 새로운 책 추가하기</Title>
+      <Subtitle>PDF, TXT, EPUB 파일을 업로드하고 AI 음악과 함께 독서를 시작하세요</Subtitle>
       <DropZone
         onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
           e.preventDefault();
@@ -130,15 +131,13 @@ export default function UploadSection() {
           }
         }}
       >
-        <p>
-          여기에서 <strong>드래그 앤 드롭</strong>으로 파일을 첨부하거나
-        </p>
-        <p>
-          <AttachButton onClick={() => fileInputRef.current?.click()}>
-            첨부하기
-          </AttachButton>
-        </p>
-        <SupportText>📎 파일 지원 형식: PDF, TXT, EPUB</SupportText>
+        <UploadIcon>📁</UploadIcon>
+        <UploadTitle>파일을 여기에 드래그하거나</UploadTitle>
+        <AttachButton onClick={() => fileInputRef.current?.click()}>
+          <ButtonIcon>📤</ButtonIcon>
+          파일 선택하기
+        </AttachButton>
+        <SupportText>지원 형식: PDF, TXT, EPUB (최대 50MB)</SupportText>
         <HiddenInput
           type="file"
           ref={fileInputRef}
@@ -209,14 +208,57 @@ const Wrapper = styled.section`
 `;
 
 const Title = styled.h2`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  text-align: center;
+`;
+
+const Subtitle = styled.p`
+  color: #666;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 3rem;
 `;
 
 const DropZone = styled.div`
-  padding: 8rem;
-  border: 2px dashed #aaa;
-  border-radius: 12px;
+  padding: 4rem 2rem;
+  border: 2px dashed #667eea;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    border-color: #764ba2;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    transform: translateY(-2px);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(transparent, rgba(102, 126, 234, 0.1), transparent 30%);
+    animation: rotate 4s linear infinite;
+    z-index: 0;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `;
 
 const ModalHeader = styled.div`
@@ -255,14 +297,43 @@ const CheckboxGroup = styled.div`
   }
 `;
 
+const UploadIcon = styled.div`
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+`;
+
+const UploadTitle = styled.h3`
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+`;
+
 const AttachButton = styled.button`
-  background-color: #5f3dc4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0.4rem 1rem;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  margin-bottom: 1rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+  }
+`;
+
+const ButtonIcon = styled.span`
+  font-size: 1.1rem;
 `;
 
 const HiddenInput = styled.input`
@@ -270,8 +341,9 @@ const HiddenInput = styled.input`
 `;
 
 const SupportText = styled.p`
-  margin-top: 1rem;
-  color: #666;
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
 `;
 
 const ModalBackdrop = styled.div`
