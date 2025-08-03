@@ -7,19 +7,23 @@ export default function IntroSection() {
         <TextSection>
           <Badge>✨ AI 기반 개인화 독서</Badge>
           <Title>
-            당신만의 독서 공간,
+            당신만의 <br />
+            독서 공간,
             <br />
             <GradientText>리드닝</GradientText>
           </Title>
           <Description>
-            AI가 분석한 당신의 취향으로 완벽한 배경음악을 생성합니다.
+            AI가 분석한 당신의 취향으로 <br />
+            완벽한 배경음악을 생성합니다.
             <br />
-            책과 음악이 만나는 새로운 독서 경험을 시작하세요.
+            책과 음악이 만나는 <br />
+            새로운 독서 경험을 시작하세요.
           </Description>
           <ButtonGroup>
             <PrimaryButton>
               <ButtonIcon>🎵</ButtonIcon>
-              지금 시작하기
+              지금 <br />
+              시작하기
             </PrimaryButton>
             <SecondaryButton>
               <ButtonIcon>📖</ButtonIcon>
@@ -27,14 +31,14 @@ export default function IntroSection() {
             </SecondaryButton>
           </ButtonGroup>
         </TextSection>
-        
+
         <VisualSection>
           <FloatingCard delay="0s">
             <CardIcon>🎧</CardIcon>
             <CardTitle>개인화된 음악</CardTitle>
             <CardDesc>AI가 당신의 취향을 학습합니다</CardDesc>
           </FloatingCard>
-          
+
           <FloatingCard delay="0.5s">
             <CardIcon>📚</CardIcon>
             <CardTitle>진행률 추적</CardTitle>
@@ -74,6 +78,22 @@ const Section = styled.section`
   margin: 6rem auto;
   padding: 0 2rem;
   animation: ${fadeInUp} 0.8s ease-out;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    margin: 4rem auto;
+    padding: 0 1rem;
+  }
+
+  @media (max-width: 480px) {
+    margin: 3rem auto;
+    padding: 0 1rem;
+  }
+
+  @media (max-width: 320px) {
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
 `;
 
 const Content = styled.div`
@@ -107,6 +127,11 @@ const Badge = styled.div`
   font-weight: 600;
   width: fit-content;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -118,6 +143,10 @@ const Title = styled.h1`
 
   @media (max-width: 768px) {
     font-size: 2.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
   }
 `;
 
@@ -136,6 +165,15 @@ const Description = styled.p`
   font-size: 1.1rem;
   margin: 0;
   max-width: 500px;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -145,6 +183,12 @@ const ButtonGroup = styled.div`
 
   @media (max-width: 768px) {
     justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
   }
 `;
 
@@ -157,11 +201,25 @@ const PrimaryButton = styled.button`
   border: none;
   padding: 1rem 2rem;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  max-width: 200px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+    width: 100%;
+    max-width: 200px;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -178,10 +236,24 @@ const SecondaryButton = styled.button`
   border: 2px solid #667eea;
   padding: 1rem 2rem;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  max-width: 200px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+    width: 100%;
+    max-width: 200px;
+  }
 
   &:hover {
     background: #667eea;
@@ -198,6 +270,14 @@ const VisualSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.8rem;
+  }
 `;
 
 const FloatingCard = styled.div<{ delay: string }>`
@@ -208,7 +288,16 @@ const FloatingCard = styled.div<{ delay: string }>`
   border: 1px solid rgba(102, 126, 234, 0.1);
   transition: all 0.3s ease;
   animation: ${float} 4s ease-in-out infinite;
-  animation-delay: ${props => props.delay};
+  animation-delay: ${(props) => props.delay};
+
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 
   &:hover {
     transform: translateY(-5px);
@@ -219,6 +308,10 @@ const FloatingCard = styled.div<{ delay: string }>`
 const CardIcon = styled.div`
   font-size: 2rem;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const CardTitle = styled.h3`
@@ -226,6 +319,10 @@ const CardTitle = styled.h3`
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const CardDesc = styled.p`
@@ -233,4 +330,8 @@ const CardDesc = styled.p`
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+  }
 `;

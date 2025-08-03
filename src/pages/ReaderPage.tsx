@@ -9,7 +9,11 @@ import EpubViewer from "../components/EpubViewer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { BASE_AI_URL } from "../api/axiosInstance";
-import { saveReadingProgress, getReadingProgress, updateReadingTime } from "@/utils/readingProgress";
+import {
+  saveReadingProgress,
+  getReadingProgress,
+  updateReadingTime,
+} from "@/utils/readingProgress";
 import { getUserMusicPreferences } from "@/utils/musicPreferences";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -44,7 +48,8 @@ export default function ReaderPage() {
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(book?.pdfUrl);
   const [txtCurrentChapter, setTxtCurrentChapter] = useState(0);
   const urlToCheck = book?.pdfUrl ?? pdfUrl ?? "";
-  const isTxtFile = urlToCheck.includes("books%2Ftxt%2F") || urlToCheck.includes(".txt");
+  const isTxtFile =
+    urlToCheck.includes("books%2Ftxt%2F") || urlToCheck.includes(".txt");
   const isEpubFile = urlToCheck.includes(".epub");
   const isPdfFile = urlToCheck.includes(".pdf");
   const startTimeRef = useRef<Date>(new Date());
@@ -76,17 +81,20 @@ export default function ReaderPage() {
   useEffect(() => {
     const restoreReadingPosition = async () => {
       if (!book?.id) return;
-      
+
       const progress = await getReadingProgress(book.id);
       if (progress) {
         if (progress.currentPage && isPdfFile) {
           setPageNumber(progress.currentPage);
-        } else if (progress.currentChapter !== undefined && (isTxtFile || isEpubFile)) {
+        } else if (
+          progress.currentChapter !== undefined &&
+          (isTxtFile || isEpubFile)
+        ) {
           setTxtCurrentChapter(progress.currentChapter);
         }
       }
     };
-    
+
     restoreReadingPosition();
   }, [book?.id, isTxtFile, isEpubFile, isPdfFile]);
 
@@ -95,7 +103,9 @@ export default function ReaderPage() {
     const interval = setInterval(() => {
       if (book?.id) {
         const now = new Date();
-        const diffInMinutes = Math.floor((now.getTime() - startTimeRef.current.getTime()) / (1000 * 60));
+        const diffInMinutes = Math.floor(
+          (now.getTime() - startTimeRef.current.getTime()) / (1000 * 60)
+        );
         if (diffInMinutes > 0) {
           updateReadingTime(book.id, diffInMinutes);
           startTimeRef.current = now;
@@ -110,12 +120,27 @@ export default function ReaderPage() {
   useEffect(() => {
     if (book?.id) {
       if (isTxtFile || isEpubFile) {
-        saveReadingProgress(book.id, undefined, undefined, txtCurrentChapter, chapters.length);
+        saveReadingProgress(
+          book.id,
+          undefined,
+          undefined,
+          txtCurrentChapter,
+          chapters.length
+        );
       } else if (isPdfFile && numPages) {
         saveReadingProgress(book.id, pageNumber, numPages);
       }
     }
-  }, [book?.id, pageNumber, numPages, txtCurrentChapter, chapters.length, isTxtFile, isEpubFile, isPdfFile]);
+  }, [
+    book?.id,
+    pageNumber,
+    numPages,
+    txtCurrentChapter,
+    chapters.length,
+    isTxtFile,
+    isEpubFile,
+    isPdfFile,
+  ]);
 
   // 사용자 음악 취향 로드
   useEffect(() => {
@@ -127,21 +152,26 @@ export default function ReaderPage() {
   }, []);
 
   // 개인화된 음악 생성 함수
-  const generatePersonalizedMusic = async (chapterIndex: number, chapterTitle: string) => {
+  const generatePersonalizedMusic = async (
+    chapterIndex: number,
+    chapterTitle: string
+  ) => {
     if (!book?.id || isGeneratingMusic) return null;
 
     setIsGeneratingMusic(true);
     try {
       const formData = new FormData();
-      
+
       // PDF/TXT 파일 추가 (필요한 경우)
       if (pdfUrl) {
         const response = await fetch(pdfUrl);
         const blob = await response.blob();
-        const file = new File([blob], `${book.name || book.id}.pdf`, { type: blob.type });
+        const file = new File([blob], `${book.name || book.id}.pdf`, {
+          type: blob.type,
+        });
         formData.append("file", file);
       }
-      
+
       formData.append("book_id", book.id);
       formData.append("page", String(chapterIndex + 1));
       formData.append("chapter_title", chapterTitle);
@@ -156,7 +186,7 @@ export default function ReaderPage() {
         throw new Error(`AI 서버 응답 오류: ${response.status}`);
       }
 
-      const data = await response.json();
+      await response.json(); // AI 서버 응답 확인용
       return `${BASE_AI_URL}/gen_musics/${book.id}/ch${chapterIndex}.wav`;
     } catch (error) {
       console.error("개인화된 음악 생성 실패:", error);
@@ -178,15 +208,17 @@ export default function ReaderPage() {
             page: Number(ch.page),
           }));
           setChapters(converted);
-          
+
           // 첫 번째 챕터의 개인화된 음악 생성 및 재생
           if (converted[0] && userPreferences.length > 0) {
-            generatePersonalizedMusic(0, converted[0].title).then((musicUrl) => {
-              if (musicUrl) {
-                audioRef.current.src = musicUrl;
-                audioRef.current.play();
+            generatePersonalizedMusic(0, converted[0].title).then(
+              (musicUrl) => {
+                if (musicUrl) {
+                  audioRef.current.src = musicUrl;
+                  audioRef.current.play();
+                }
               }
-            });
+            );
           } else if (converted[0]?.musicUrl) {
             // 기존 음악이 있는 경우 기본값으로 사용
             audioRef.current.src = converted[0].musicUrl;
@@ -195,7 +227,7 @@ export default function ReaderPage() {
         }
       }
     };
-    
+
     // 사용자 취향이 로드된 후에 챕터 로드
     if (userPreferences.length >= 0) {
       fetchChapters();
@@ -207,18 +239,20 @@ export default function ReaderPage() {
       .slice()
       .reverse()
       .find((ch) => ch.page <= pageNumber);
-    
+
     if (matched) {
-      const chapterIndex = chapters.findIndex(ch => ch === matched);
-      
+      const chapterIndex = chapters.findIndex((ch) => ch === matched);
+
       // 사용자 취향이 있으면 개인화된 음악 생성, 없으면 기본 음악 사용
       if (userPreferences.length > 0) {
-        generatePersonalizedMusic(chapterIndex, matched.title).then((musicUrl) => {
-          if (musicUrl && musicUrl !== audioRef.current.src) {
-            audioRef.current.src = musicUrl;
-            if (isPlaying) audioRef.current.play();
+        generatePersonalizedMusic(chapterIndex, matched.title).then(
+          (musicUrl) => {
+            if (musicUrl && musicUrl !== audioRef.current.src) {
+              audioRef.current.src = musicUrl;
+              if (isPlaying) audioRef.current.play();
+            }
           }
-        });
+        );
       } else if (matched.musicUrl !== audioRef.current.src) {
         audioRef.current.src = matched.musicUrl;
         if (isPlaying) audioRef.current.play();
@@ -249,14 +283,15 @@ export default function ReaderPage() {
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{book.author}</BookAuthor>
               </BookInfo>
-              <CloseButton onClick={() => setSidebarOpen(false)}>×</CloseButton>
+              {/* <CloseButton onClick={() => setSidebarOpen(false)}>×</CloseButton> */}
             </SidebarHeader>
             <ChapterTitle>📚 목차</ChapterTitle>
             <ul>
               {chapters.map((ch, idx) => {
-                const defaultMusicUrl = (isTxtFile || isEpubFile)
-                  ? `${BASE_AI_URL}/gen_musics/${book.name}/ch${idx}.wav`
-                  : ch.musicUrl;
+                const defaultMusicUrl =
+                  isTxtFile || isEpubFile
+                    ? `${BASE_AI_URL}/gen_musics/${book.name}/ch${idx}.wav`
+                    : ch.musicUrl;
 
                 return (
                   <li key={idx}>
@@ -276,10 +311,11 @@ export default function ReaderPage() {
                         onClick={async () => {
                           const audio = audioRef.current;
                           audio.pause();
-                          
+
                           // 사용자 취향이 있으면 개인화된 음악 생성
                           if (userPreferences.length > 0) {
-                            const personalizedUrl = await generatePersonalizedMusic(idx, ch.title);
+                            const personalizedUrl =
+                              await generatePersonalizedMusic(idx, ch.title);
                             if (personalizedUrl) {
                               audio.src = personalizedUrl;
                               audio.play();
@@ -293,16 +329,19 @@ export default function ReaderPage() {
                         }}
                         disabled={isGeneratingMusic}
                       >
-                        {isGeneratingMusic 
-                          ? "🎵" 
-                          : (audioRef.current.src.includes(`ch${idx}`) && isPlaying ? "⏸" : "▶")
-                        }
+                        {isGeneratingMusic
+                          ? "🎵"
+                          : audioRef.current.src.includes(`ch${idx}`) &&
+                            isPlaying
+                          ? "⏸"
+                          : "▶"}
                       </button>
-                      <a 
-                        href={userPreferences.length > 0 
-                          ? `${BASE_AI_URL}/gen_musics/${book.id}/ch${idx}.wav` 
-                          : defaultMusicUrl
-                        } 
+                      <a
+                        href={
+                          userPreferences.length > 0
+                            ? `${BASE_AI_URL}/gen_musics/${book.id}/ch${idx}.wav`
+                            : defaultMusicUrl
+                        }
                         download
                       >
                         ⬇
@@ -399,6 +438,10 @@ const Container = styled.div`
   margin: 0 auto;
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
 `;
 
 const Layout = styled.div`
@@ -410,7 +453,7 @@ const Layout = styled.div`
 
 const Hamburger = styled.button`
   position: fixed;
-  top: 2rem;
+  top: 5rem;
   left: 2rem;
   z-index: 1001;
   width: 50px;
@@ -425,6 +468,22 @@ const Hamburger = styled.button`
   font-size: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    top: 1.5rem;
+    left: 1.5rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
+
+  @media (max-width: 480px) {
+    top: 1rem;
+    left: 1rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
 
   &:hover {
     background: #667eea;
@@ -448,6 +507,16 @@ const Sidebar = styled.aside`
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
   transform: translateX(0);
   transition: transform 0.3s ease;
+
+  @media (max-width: 768px) {
+    width: 300px;
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    width: 280px;
+    padding: 1rem;
+  }
 
   ul {
     list-style: none;
@@ -473,7 +542,7 @@ const Sidebar = styled.aside`
         font-size: 1rem;
         display: block;
         margin-bottom: 0.5rem;
-        
+
         &:hover {
           color: #667eea;
         }
@@ -564,6 +633,11 @@ const Main = styled.main`
 
   @media (max-width: 768px) {
     padding: 1rem;
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem;
   }
 `;
 
@@ -577,6 +651,7 @@ const SidebarHeader = styled.div`
 `;
 
 const BookInfo = styled.div`
+  margin-top: 7rem;
   flex: 1;
 `;
 
@@ -586,29 +661,30 @@ const BookTitle = styled.h2`
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const BookAuthor = styled.p`
   color: #666;
   font-size: 1rem;
   margin: 0;
-`;
 
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #666;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
 
-  &:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
   }
 `;
+
 
 const ChapterTitle = styled.h3`
   color: #333;
@@ -617,26 +693,6 @@ const ChapterTitle = styled.h3`
   margin: 0 0 1rem 0;
 `;
 
-const Header = styled.div`
-  margin-bottom: 2rem;
-  padding: 2rem;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-
-  h2 {
-    color: #333;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-  }
-
-  p {
-    color: #666;
-    font-size: 1.1rem;
-    margin: 0;
-  }
-`;
 
 const PdfContainer = styled.div`
   background: white;
@@ -645,6 +701,38 @@ const PdfContainer = styled.div`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(102, 126, 234, 0.1);
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 0 -0.5rem;
+  }
+
+  /* PDF 반응형 처리 */
+  .react-pdf__Document {
+    @media (max-width: 768px) {
+      max-width: 100%;
+    }
+  }
+
+  .react-pdf__Page {
+    @media (max-width: 768px) {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  }
+
+  .react-pdf__Page__canvas {
+    @media (max-width: 768px) {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  }
 `;
 
 const NavButtons = styled.div`
@@ -652,6 +740,17 @@ const NavButtons = styled.div`
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
+
+  @media (max-width: 768px) {
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
 
   button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -664,6 +763,19 @@ const NavButtons = styled.div`
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 120px;
+
+    @media (max-width: 768px) {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+      min-width: 100px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.7rem 1rem;
+      font-size: 0.8rem;
+      min-width: 80px;
+      border-radius: 8px;
+    }
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
@@ -683,5 +795,13 @@ const NavButtons = styled.div`
     color: #333;
     font-weight: 600;
     font-size: 1.1rem;
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
   }
 `;

@@ -17,11 +17,11 @@ type Chapter = {
 
 export default function EpubViewer({
   epubUrl,
-  name,
+  name: _name,
   currentIndex,
   setCurrentIndex,
   externalAudioRef,
-  setIsPlaying,
+  setIsPlaying: _setIsPlaying,
 }: Props) {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ export default function EpubViewer({
       externalAudioRef.current.pause();
       externalAudioRef.current.src = "";
     };
-  }, []);
+  }, [externalAudioRef]);
 
   useEffect(() => {
     const loadEpub = async () => {
@@ -55,7 +55,7 @@ export default function EpubViewer({
         // EPUB는 ZIP 형태이므로 직접 텍스트로 읽기 어려움
         // 임시로 에러 처리
         const blob = await response.blob();
-        const text = await blob.text();
+        await blob.text(); // EPUB 파싱을 위해 필요하지만 현재는 미사용
         
         // 임시 챕터 데이터 (실제로는 EPUB 파싱 필요)
         const tempChapters: Chapter[] = [

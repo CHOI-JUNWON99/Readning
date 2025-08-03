@@ -203,8 +203,28 @@ export default function UploadSection() {
 // 스타일 정의
 const Wrapper = styled.section`
   width: 100%;
+  max-width: 800px;
+  margin: 3rem auto 0;
   text-align: center;
-  margin-top: 3rem;
+  padding: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 375px) {
+    margin-top: 1.2rem;
+  }
+
+  @media (max-width: 320px) {
+    margin-top: 1rem;
+  }
 `;
 
 const Title = styled.h2`
@@ -213,6 +233,14 @@ const Title = styled.h2`
   color: #1a1a1a;
   margin-bottom: 0.5rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 1.7rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -220,6 +248,21 @@ const Subtitle = styled.p`
   font-size: 1rem;
   text-align: center;
   margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const DropZone = styled.div`
@@ -231,6 +274,28 @@ const DropZone = styled.div`
   text-align: center;
   position: relative;
   overflow: hidden;
+  margin: 0 auto;
+  max-width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 3rem 1.5rem;
+    border-radius: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 2.5rem 1.2rem;
+    border-radius: 14px;
+  }
+
+  @media (max-width: 375px) {
+    padding: 2rem 1rem;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 1.8rem 0.8rem;
+    border-radius: 10px;
+  }
 
   &:hover {
     border-color: #764ba2;
@@ -284,16 +349,29 @@ const CheckboxGroup = styled.div`
   align-items: flex-start;
   gap: 0.6rem;
 
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+
   label {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     font-size: 0.95rem;
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
   }
 
   input[type="checkbox"] {
     width: 16px;
     height: 16px;
+
+    @media (max-width: 480px) {
+      width: 18px;
+      height: 18px;
+    }
   }
 `;
 
@@ -301,6 +379,15 @@ const UploadIcon = styled.div`
   font-size: 4rem;
   margin-bottom: 1rem;
   opacity: 0.7;
+
+  @media (max-width: 768px) {
+    font-size: 3.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 3rem;
+    margin-bottom: 0.8rem;
+  }
 `;
 
 const UploadTitle = styled.h3`
@@ -308,6 +395,15 @@ const UploadTitle = styled.h3`
   color: #333;
   margin-bottom: 1.5rem;
   font-weight: 600;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const AttachButton = styled.button`
@@ -325,6 +421,16 @@ const AttachButton = styled.button`
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -344,6 +450,10 @@ const SupportText = styled.p`
   color: #888;
   font-size: 0.9rem;
   margin: 0;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const ModalBackdrop = styled.div`
@@ -356,17 +466,95 @@ const Modal = styled.div`
   background: white;
   padding: 2rem;
   width: 400px;
+  max-width: 90vw;
   margin: 5rem auto;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: 500px;
+    padding: 1.8rem;
+    margin: 3rem auto;
+  }
+
+  @media (max-width: 480px) {
+    width: 95%;
+    max-width: 95vw;
+    padding: 1.5rem;
+    margin: 2.5rem auto;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 375px) {
+    padding: 1.2rem;
+    margin: 2rem auto;
+    border-radius: 10px;
+  }
+
+  @media (max-width: 320px) {
+    padding: 1rem;
+    margin: 1.5rem auto;
+    border-radius: 8px;
+  }
 
   input {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #aaa;
-    border-radius: 6px;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.7rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 320px) {
+      padding: 0.6rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: 700;
+
+    @media (max-width: 480px) {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: #555;
+    font-size: 1.1rem;
+    font-weight: 600;
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 0.95rem;
+    }
   }
 `;
 
@@ -378,4 +566,14 @@ const SubmitBtn = styled.button`
   border-radius: 6px;
   padding: 0.6rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  @media (max-width: 480px) {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    background: #4a2faf;
+  }
 `;

@@ -163,22 +163,82 @@ export default function BookshelfSection() {
 }
 
 const Wrapper = styled.section`
-  max-width: 860px;
+  max-width: 800px;
+  width: 100%;
   margin: 2rem auto;
+  padding: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin: 1.8rem auto;
+  }
+
+  @media (max-width: 480px) {
+    margin: 1.5rem auto;
+  }
+
+  @media (max-width: 375px) {
+    margin: 1.2rem auto;
+  }
+
+  @media (max-width: 320px) {
+    margin: 1rem auto;
+  }
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1.5rem 1rem 1rem;
+  margin: 1.5rem 0 1rem;
+  padding: 0;
+
+  @media (max-width: 768px) {
+    margin: 1.2rem 0 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    margin: 1rem 0 0.8rem;
+  }
+
+  @media (max-width: 375px) {
+    gap: 0.8rem;
+    margin: 0.8rem 0 0.6rem;
+  }
+
+  @media (max-width: 320px) {
+    gap: 0.6rem;
+    margin: 0.6rem 0 0.5rem;
+  }
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: #3e2c1c;
   margin: 0;
   font-family: "Georgia", serif;
+  font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  @media (max-width: 375px) {
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 1rem;
+  }
 `;
 
 const MusicButton = styled.button`
@@ -195,10 +255,37 @@ const MusicButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1.3rem;
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  @media (max-width: 375px) {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 320px) {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
+  }
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -206,8 +293,22 @@ const SliderContainer = styled.div`
   display: flex;
   overflow-x: auto;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 0;
   scroll-behavior: smooth;
+
+  @media (max-width: 768px) {
+    padding: 0.8rem 0;
+    gap: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0;
+    gap: 0.6rem;
+  }
+
+  @media (max-width: 320px) {
+    padding: 0.3rem 0;
+  }
 
   &::-webkit-scrollbar {
     height: 6px;
@@ -220,28 +321,77 @@ const SliderContainer = styled.div`
 `;
 
 const BookCard = styled.div`
-  min-width: 130px;
+  min-width: 140px;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(102, 126, 234, 0.1);
   text-align: center;
   padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
 
+  @media (max-width: 768px) {
+    min-width: 130px;
+    padding: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 120px;
+    padding: 0.8rem;
+    border-radius: 14px;
+  }
+
+  @media (max-width: 375px) {
+    min-width: 110px;
+    padding: 0.7rem;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 320px) {
+    min-width: 100px;
+    padding: 0.6rem;
+    border-radius: 10px;
+  }
+
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
     border-color: rgba(102, 126, 234, 0.3);
+  }
+
+  &:active {
+    transform: translateY(-2px);
   }
 `;
 
 const BookCoverContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 140px;
-  margin-bottom: 0.5rem;
+  height: 160px;
+  margin-bottom: 0.8rem;
+  border-radius: 8px;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    height: 140px;
+    margin-bottom: 0.7rem;
+  }
+
+  @media (max-width: 480px) {
+    height: 130px;
+    margin-bottom: 0.6rem;
+  }
+
+  @media (max-width: 375px) {
+    height: 120px;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 320px) {
+    height: 110px;
+    margin-bottom: 0.4rem;
+  }
 `;
 
 const BookCover = styled.div`
@@ -249,7 +399,14 @@ const BookCover = styled.div`
   height: 100%;
   background-size: cover;
   background-position: center;
-  border-radius: 6px;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
 `;
 
 const ProgressOverlay = styled.div`
@@ -291,33 +448,95 @@ const ProgressText = styled.span`
 `;
 
 const BookInfo = styled.div`
+  padding: 0.2rem 0;
+  
   strong {
     display: block;
-    font-size: 0.95rem;
-    color: #3e2c1c;
+    font-size: 1rem;
+    color: #2c2c2c;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 375px) {
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 0.8rem;
+    }
   }
+  
   small {
-    font-size: 0.8rem;
-    color: #777;
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 375px) {
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 320px) {
+      font-size: 0.65rem;
+    }
   }
 `;
 
 const ProgressInfo = styled.div`
   font-size: 0.75rem;
   color: #667eea;
-  font-weight: bold;
-  margin-top: 0.2rem;
-  padding: 0.2rem 0.5rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  padding: 0.25rem 0.6rem;
   background: rgba(102, 126, 234, 0.1);
   border-radius: 12px;
   display: inline-block;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  @media (max-width: 375px) {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  @media (max-width: 320px) {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.3rem;
+  }
 `;
 
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 0;
   max-height: 500px;
   overflow-y: auto;
 
@@ -334,7 +553,24 @@ const GridContainer = styled.div`
     grid-template-columns: repeat(3, 1fr);
   }
 
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    padding: 0.8rem 0;
+  }
+
   @media (max-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+  }
+
+  @media (max-width: 320px) {
+    padding: 0.3rem 0;
+    gap: 0.5rem;
   }
 `;
